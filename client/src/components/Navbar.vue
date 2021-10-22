@@ -4,17 +4,15 @@
       <a class="navbar-brand" href="/">Nymble Movies</a>
 
       <div class="collapse navbar-collapse" id="navbarCollapse">
-        <form class="d-flex" @submit.prevent="search">
-          >
-          <input
-            v-model="term"
-            class="form-control me-2"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-          />
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+        <input
+          v-model="searchQuery"
+          class="form-control me-2"
+          type="search"
+          placeholder="Search"
+          aria-label="Search"
+          @change="changeSearchQuery"
+          @keyup="changeSearchQuery"
+        />
       </div>
     </div>
   </nav>
@@ -24,12 +22,12 @@
 export default {
   data() {
     return {
-      term: "",
+      searchQuery: "",
     };
   },
   methods: {
-    search() {
-      this.$router.push({ name: "Search", params: { query: this.term } });
+    changeSearchQuery() {
+      this.$store.commit("setSearchQuery", this.searchQuery);
     },
   },
 };

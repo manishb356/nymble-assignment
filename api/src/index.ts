@@ -19,7 +19,6 @@ app.use(
  * If search term is not provided, return all movies.
  */
 app.get("/movies", (req, resp) => {
-  // req.params.search
   resp.send(movies);
 });
 
@@ -37,7 +36,9 @@ app.get("/movies/:id", (req, resp) => {
   const id = Number(req.params.id);
   // TODO Return the movie
   let result = movies.find((movie) => movie.id === id);
-  if (!result) resp.send({ message: "No Movie found with that id" });
+
+  if (!result)
+    resp.status(404).send({ message: "No Movie found with that id" });
   else resp.send(result);
 });
 
@@ -48,7 +49,8 @@ app.get("/genres/:id", (req, resp) => {
   const id = Number(req.params.id);
   // TODO Return the genre
   let result = genres.find((genre) => genre.id === id);
-  if (!result) resp.send({ message: "No genre found with that id" });
+  if (!result)
+    resp.status(404).send({ message: "No genre found with that id" });
   else resp.send(result);
 });
 
@@ -61,16 +63,18 @@ app.post("/movies/:id/ratings", (req, resp) => {
   const id = Number(req.params.id);
   let rating = Number(req.body.ratingVal);
 
-  if (rating > 10) {
-    resp.send({ message: "Rating should be less than 10" });
+  if (rating < 0 || rating > 10) {
+    resp.status(400).send({ message: "Rating should be between 0 and 10" });
   } else {
     let index = movies.findIndex((movie) => movie.id === id);
     let current_rating = movies[index].vote_average,
       current_count = movies[index].vote_count;
-    current_rating += rating / (current_count + 1);
-    current_count++;
 
-    movies[index].vote_average = current_rating;
+    current_rating =
+      (current_rating * current_count + rating) / ++current_count;
+
+    // Increase fixed count to see diffrence
+    movies[index].vote_average = Number(current_rating.toFixed(4));
     movies[index].vote_count = current_count;
 
     resp.send(movies[index]);
@@ -90,15 +94,35 @@ app.get("/search", (req, resp) => {
  */
 app.get("/search/:name", (req, resp) => {
   const name = String(req.params.name);
-  console.log(name);
   let result: Movie[] = [];
+
   movies.forEach((movie) => {
-    if (movie.title.toLowerCase().includes(name.toLowerCase())) {
+    //checking both the title and overview for the queried parameter
+    if (
+      movie.title.toLowerCase().includes(name.toLowerCase()) ||
+      movie.overview.toLowerCase().includes(name.toLowerCase())
+    ) {
       result.push(movie);
     }
   });
+
   resp.send(result);
 });
+
+app.get("/sortedMovies", (req, resp) => {
+  resp.send(movies.sort(customCompare));
+});
+
+//compare function to sort the array based on popularity
+function customCompare(a: Movie, b: Movie) {
+  if (a.popularity < b.popularity) {
+    return 1;
+  }
+  if (a.popularity > b.popularity) {
+    return -1;
+  }
+  return 0;
+}
 
 app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);

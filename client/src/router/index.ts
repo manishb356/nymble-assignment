@@ -11,18 +11,6 @@ const routes: Array<RouteConfig> = [
     component: Home,
   },
   {
-    path: "/search/:query",
-    name: "Search",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/Search.vue"),
-  },
-  {
-    path: "/loading",
-    name: "Loading",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/Loading.vue"),
-  },
-  {
     path: "/movie/:id",
     name: "Movie",
     component: () =>
